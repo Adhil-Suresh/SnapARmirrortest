@@ -6,6 +6,8 @@ const remoteApiService: RemoteApiService = {
     // Define how to handle requests
     getRequestHandler(request) {
         return (reply) => {
+                    console.error("Error bootstrapping Camer:");
+
             if (request.endpointId !== "apiremote") {
                 reply({
                     status: "error",
