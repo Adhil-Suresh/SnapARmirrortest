@@ -5,11 +5,18 @@ const remoteApiService: RemoteApiService = {
 
     // Define how to handle requests
     getRequestHandler(request) {
-        // Check if the endpoint ID matches the expected one
-        //if (request.endpointId !== "apiremote") return;
-
-        // Handle the request
         return (reply) => {
+            if (request.endpointId !== "apiremote") {
+                reply({
+                    status: "error",
+                    metadata: {},
+                    body: new TextEncoder().encode(
+                        JSON.stringify({ error: "Invalid endpoint ID" })
+                    ),
+                });
+                return;
+            }
+
             fetch("https://snap-a-rmirrortest.vercel.app/api/remote", {
                 method: "GET",
                 headers: {
@@ -39,12 +46,18 @@ const remoteApiService: RemoteApiService = {
 };
 
 // Bootstrap Camera Kit
-const cameraKit = await bootstrapCameraKit(configuration, (container) =>
-    container.provides(
-        Injectable(
-            remoteApiServicesFactory.token,
-            [remoteApiServicesFactory.token] as const,
-            (existing: RemoteApiServices) => [...existing, remoteApiService]
-        )
-    )
-);
+(async () => {
+    try {
+        const cameraKit = await bootstrapCameraKit(configuration, (container) =>
+            container.provides(
+                Injectable(
+                    remoteApiServicesFactory.token,
+                    [remoteApiServicesFactory.token] as const,
+                    (existing: RemoteApiServices) => [...existing, remoteApiService]
+                )
+            )
+        );
+    } catch (error) {
+        console.error("Error bootstrapping Camera Kit:", error.message);
+    }
+})();
