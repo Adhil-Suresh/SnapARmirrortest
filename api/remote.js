@@ -1,42 +1,50 @@
-export default function handler(req, res) {
-  try {
-    // Set CORS headers
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+// Define the Remote API Service
+const remoteApiService: RemoteApiService = {
+    // Your API Spec ID
+    apiSpecId: "43f1212b-3cf6-4b12-a857-c42f32696169",
 
-    // Handle preflight request
-    if (req.method === 'OPTIONS') {
-      return res.status(204).end(); // No content
-    }
+    // Define how to handle requests
+    getRequestHandler(request) {
+        // Check if the endpoint ID matches the expected one
+        if (request.endpointId !== "apiremote") return;
 
-    // Ensure the request method is GET
-    if (req.method !== 'GET') {
-      return res.status(405).json({ message: 'Method not allowed' });
-    }
+        // Handle the request
+        return (reply) => {
+            fetch("https://snap-a-rmirrortest.vercel.app/api/remote", {
+                method: "GET",
+                headers: {
+                    Accept: "application/json",
+                },
+            })
+                .then((res) => res.text()) // Read the response as text
+                .then((res) =>
+                    reply({
+                        status: "success",
+                        metadata: {},
+                        body: new TextEncoder().encode(res), // Encode the body
+                    })
+                )
+                .catch((error) => {
+                    console.error("API Call Failed:", error);
+                    reply({
+                        status: "error",
+                        metadata: {},
+                        body: new TextEncoder().encode(
+                            JSON.stringify({ error: "API call failed" })
+                        ),
+                    });
+                });
+        };
+    },
+};
 
-    // Extract parameters from query, headers, or path
-    const action = req.query.action || '';
-    const payload = req.query.payload || '';
-
-    // Validate parameters
-    if (!action || !payload) {
-      return res.status(400).json({ message: 'Invalid request parameters' });
-    }
-
-    // Log the action and payload (for debugging)
-    console.log(`Action received: ${action}`);
-    console.log('Payload:', payload);
-
-    // Respond to the client
-    res.status(200).json({
-      status: 'success',
-      message: 'Data processed successfully!',
-      data: { action, payload },
-    });
-  } catch (error) {
-    // Handle unexpected errors
-    console.error('Server Error:', error.message);
-    res.status(500).json({ message: 'Internal server error' });
-  }
-}
+// Bootstrap Camera Kit
+const cameraKit = await bootstrapCameraKit(configuration, (container) =>
+    container.provides(
+        Injectable(
+            remoteApiServicesFactory.token,
+            [remoteApiServicesFactory.token] as const,
+            (existing: RemoteApiServices) => [...existing, remoteApiService]
+        )
+    )
+);
