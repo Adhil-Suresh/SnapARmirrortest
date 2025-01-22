@@ -1,52 +1,34 @@
-// Define the Remote API Service
-const remoteApiService: RemoteApiService = {
-    // Your API Spec ID
-    apiSpecId: "43f1212b-3cf6-4b12-a857-c42f32696169",
 
-    // Define how to handle requests
+const catFactsService: RemoteApiService = {
+    apiSpecId: "03d765c5-20bd-4495-9a27-30629649cf57",
+
     getRequestHandler(request) {
-        console.log("Adhil 1");
-        // Check if the endpoint ID matches the expected one
-        if (request.endpointId !== "apiremote") return;
-        console.log("Adhil 2");
+        if (request.endpointId !== "fact") return;
 
-        // Handle the request
         return (reply) => {
-            fetch("https://snap-a-rmirrortest.vercel.app/api/remote", {
-                method: "GET",
+            fetch("https://catfact.ninja/fact", {
                 headers: {
                     Accept: "application/json",
                 },
             })
-                .then((res) => res.text()) // Read the response as text
+                .then((res) => res.text())
                 .then((res) =>
                     reply({
                         status: "success",
                         metadata: {},
-                        body: new TextEncoder().encode(res), // Encode the body
+                        body: new TextEncoder().encode(res),
                     })
-                )
-                .catch((error) => {
-                    console.error("API Call Failed:", error);
-                    reply({
-                        status: "error",
-                        metadata: {},
-                        body: new TextEncoder().encode(
-                            JSON.stringify({ error: "API call failed" })
-                        ),
-                    });
-                });
+                );
         };
     },
 };
 
-// Bootstrap Camera Kit
 const cameraKit = await bootstrapCameraKit(configuration, (container) =>
     container.provides(
         Injectable(
             remoteApiServicesFactory.token,
             [remoteApiServicesFactory.token] as const,
-            (existing: RemoteApiServices) => [...existing, remoteApiService]
+            (existing: RemoteApiServices) => [...existing, catFactsService]
         )
     )
 );
