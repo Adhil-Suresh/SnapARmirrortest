@@ -1,34 +1,42 @@
+export default function handler(req, res) {
+  try {
+    // Set CORS headers
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-const catFactsService: RemoteApiService = {
-    apiSpecId: "03d765c5-20bd-4495-9a27-30629649cf57",
+    // Handle preflight request
+    if (req.method === 'OPTIONS') {
+      return res.status(204).end(); // No content
+    }
 
-    getRequestHandler(request) {
-        if (request.endpointId !== "fact") return;
+    // Ensure the request method is GET
+    if (req.method !== 'GET') {
+      return res.status(405).json({ message: 'Method not allowed' });
+    }
 
-        return (reply) => {
-            fetch("https://catfact.ninja/fact", {
-                headers: {
-                    Accept: "application/json",
-                },
-            })
-                .then((res) => res.text())
-                .then((res) =>
-                    reply({
-                        status: "success",
-                        metadata: {},
-                        body: new TextEncoder().encode(res),
-                    })
-                );
-        };
-    },
-};
+    // Extract parameters from query, headers, or path
+    const action = req.query.action || '';
+    const payload = req.query.payload || '';
 
-const cameraKit = await bootstrapCameraKit(configuration, (container) =>
-    container.provides(
-        Injectable(
-            remoteApiServicesFactory.token,
-            [remoteApiServicesFactory.token] as const,
-            (existing: RemoteApiServices) => [...existing, catFactsService]
-        )
-    )
-);
+    // Validate parameters
+    if (!action || !payload) {
+      return res.status(400).json({ message: 'Invalid request parameters' });
+    }
+
+    // Log the action and payload (for debugging)
+    console.log(`Action received: ${action}`);
+    console.log('Payload:', payload);
+
+    // Respond to the client
+    res.status(200).json({
+      status: 'success',
+      message: 'Data processed successfully!',
+      data: { action, payload },
+    });
+  } catch (error) {
+    // Handle unexpected errors
+    console.error('Server Error:', error.message);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+}
