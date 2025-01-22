@@ -5,8 +5,10 @@ const remoteApiService: RemoteApiService = {
 
     // Define how to handle requests
     getRequestHandler(request) {
+        console.log("Adhil 1");
         // Check if the endpoint ID matches the expected one
         if (request.endpointId !== "apiremote") return;
+        console.log("Adhil 2");
 
         // Handle the request
         return (reply) => {
