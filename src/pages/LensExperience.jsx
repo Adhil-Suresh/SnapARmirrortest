@@ -1,6 +1,6 @@
-import { Lens } from "../components/Lens";
-import { useEffect, useRef, useState } from "react";
-import { bootstrapCameraKit, Transform2D } from "@snap/camera-kit";
+import { Lens } from '../components/Lens';
+import { useEffect, useRef, useState } from 'react';
+import { bootstrapCameraKit, Transform2D } from '@snap/camera-kit';
 
 const setupAndStartLens = async function (canvas, setLoader) {
   setLoader([true, true]);
@@ -60,9 +60,9 @@ export function LensExperience() {
 
   useEffect(() => {
     setupAndStartLens(lensRef.current, setPlaceholderStatus);
-    document.addEventListener("fullscreenchange", () => {
+    document.addEventListener('fullscreenchange', () => {
       lensRef.current.style.width = 100;
-      console.log("fullscreen");
+      console.log('fullscreen');
     });
   }, []);
 
@@ -74,9 +74,9 @@ export function LensExperience() {
         showPlaceholder={placeholderStatus[1]}
       />
       <button
-        className="px-4 py-2 m-4 rounded-xl border bg-gradient-to-r from-indigo-300 via-pink-300 to-red-300"
+        className='px-4 py-2 m-4 rounded-xl border bg-gradient-to-r from-indigo-300 via-pink-300 to-red-300'
         onClick={() => {
-          document.getElementById("canvas-parent").requestFullscreen();
+          document.getElementById('canvas-parent').requestFullscreen();
         }}
       >
         Full Screen
@@ -84,3 +84,4 @@ export function LensExperience() {
     </>
   );
 }
+//
