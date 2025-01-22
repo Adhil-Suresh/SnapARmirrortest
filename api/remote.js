@@ -2,16 +2,21 @@ export default function handler(req, res) {
   try {
     // Set CORS headers
     res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'POST');
+    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+    // Handle preflight request
+    if (req.method === 'OPTIONS') {
+      return res.status(204).end(); // No content
+    }
 
     // Ensure the request method is POST
     if (req.method !== 'POST') {
       return res.status(405).json({ message: 'Method not allowed' });
     }
 
-    // Parse request body
-    const { action, payload } = req.body;
+    // Parse request body (ensure req.body is parsed as JSON)
+    const { action, payload } = req.body || {};
 
     // Validate request body
     if (!action || !payload) {
