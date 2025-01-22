@@ -2,7 +2,7 @@ export default function handler(req, res) {
   try {
     // Set CORS headers
     res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
     // Handle preflight request
@@ -10,17 +10,18 @@ export default function handler(req, res) {
       return res.status(204).end(); // No content
     }
 
-    // Ensure the request method is POST
-    if (req.method !== 'POST') {
+    // Ensure the request method is GET
+    if (req.method !== 'GET') {
       return res.status(405).json({ message: 'Method not allowed' });
     }
 
-    // Parse request body (ensure req.body is parsed as JSON)
-    const { action, payload } = req.body || {};
+    // Extract parameters from query, headers, or path
+    const action = req.query.action || '';
+    const payload = req.query.payload || '';
 
-    // Validate request body
+    // Validate parameters
     if (!action || !payload) {
-      return res.status(400).json({ message: 'Invalid request payload' });
+      return res.status(400).json({ message: 'Invalid request parameters' });
     }
 
     // Log the action and payload (for debugging)
@@ -31,11 +32,11 @@ export default function handler(req, res) {
     res.status(200).json({
       status: 'success',
       message: 'Data processed successfully!',
-      data: { customKey: 'customValue' },
+      data: { action, payload },
     });
   } catch (error) {
     // Handle unexpected errors
-    console.error('Server Error:', error);
+    console.error('Server Error:', error.message);
     res.status(500).json({ message: 'Internal server error' });
   }
 }
