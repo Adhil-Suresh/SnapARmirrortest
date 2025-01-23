@@ -1,13 +1,13 @@
-// Define the Remote API Service
-const remoteApiService: RemoteApiService = {
+const remoteApiService = {
     // Your API Spec ID
     apiSpecId: "43f1212b-3cf6-4b12-a857-c42f32696169",
 
     // Define how to handle requests
     getRequestHandler(request) {
         return (reply) => {
-                    console.error("Error bootstrapping Camer:");
+            console.error("Error bootstrapping Camer:");
 
+            // Ensure endpointId matches expected value
             if (request.endpointId !== "apiremote") {
                 reply({
                     status: "error",
@@ -19,13 +19,26 @@ const remoteApiService: RemoteApiService = {
                 return;
             }
 
-            fetch("https://snap-a-rmirrortest.vercel.app/api/remote", {
+            // Construct the URL with query parameters
+            const action = request.queryParameters?.action || "defaultAction";
+            const payload = request.queryParameters?.payload || "defaultPayload";
+            const url = `https://snap-a-rmirrortest.vercel.app/api/remote?action=${encodeURIComponent(
+                action
+            )}&payload=${encodeURIComponent(payload)}`;
+
+            // Make the API request
+            fetch(url, {
                 method: "GET",
                 headers: {
                     Accept: "application/json",
                 },
             })
-                .then((res) => res.text()) // Read the response as text
+                .then((res) => {
+                    if (!res.ok) {
+                        throw new Error(`HTTP error! Status: ${res.status}`);
+                    }
+                    return res.text(); // Read the response as text
+                })
                 .then((res) =>
                     reply({
                         status: "success",
@@ -55,7 +68,7 @@ const remoteApiService: RemoteApiService = {
                 Injectable(
                     remoteApiServicesFactory.token,
                     [remoteApiServicesFactory.token] as const,
-                    (existing: RemoteApiServices) => [...existing, remoteApiService]
+                    (existing) => [...existing, remoteApiService]
                 )
             )
         );
