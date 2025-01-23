@@ -24,7 +24,7 @@ const remoteApiService = {
             const payload = request.queryParameters?.payload || "defaultPayload";
             const url = `https://snap-a-rmirrortest.vercel.app/api/remote?action=${encodeURIComponent(
                 action
-            )}&payload=${encodeURIComponent(payload)}`;
+            )}&payload=${encodeURIComponent(payload)}`; // Fixed template literal formatting
 
             // Make the API request
             fetch(url, {
